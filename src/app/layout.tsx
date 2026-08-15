@@ -27,7 +27,11 @@ export const metadata: Metadata = {
     "A personal wine intelligence library that turns every bottle into expert-level knowledge.",
 };
 
-export default function RootLayout({ children }: LayoutProps<"/">) {
+export default function RootLayout({
+  children,
+}: Readonly<{
+  children: React.ReactNode;
+}>) {
   return (
     <html
       lang="en"

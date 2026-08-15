@@ -28,8 +28,35 @@ function required(name: string): string {
   return value;
 }
 
+type SeedClient = {
+  from: (table: string) => {
+    select: (columns: string) => SeedQuery;
+    insert: (values: Record<string, unknown> | Record<string, unknown>[]) => SeedQuery;
+    delete: () => SeedQuery;
+    upsert: (values: Record<string, unknown>, options?: Record<string, unknown>) => SeedQuery;
+  };
+  auth: {
+    admin: {
+      createUser: (input: Record<string, unknown>) => Promise<{
+        data: { user: { id: string } | null };
+        error: { message: string } | null;
+      }>;
+      listUsers: () => Promise<{ data: { users: Array<{ id: string; email?: string }> } }>;
+    };
+  };
+};
+
+type SeedQuery = {
+  ilike: (column: string, value: string) => SeedQuery;
+  eq: (column: string, value: unknown) => SeedQuery;
+  is: (column: string, value: null) => SeedQuery;
+  maybeSingle: () => Promise<{ data: { id?: string } | null }>;
+  single: () => Promise<{ data: { id: string }; error: { message: string } | null }>;
+  select: (columns: string) => SeedQuery;
+};
+
 async function upsertRegion(
-  supabase: ReturnType<typeof createClient>,
+  supabase: SeedClient,
   input: {
     name: string;
     type: "country" | "region" | "subregion" | "appellation" | "vineyard";
@@ -66,7 +93,7 @@ async function main() {
   const serviceKey = required("SUPABASE_SERVICE_ROLE_KEY");
   const supabase = createClient(url, serviceKey, {
     auth: { persistSession: false, autoRefreshToken: false },
-  });
+  }) as unknown as SeedClient;
 
   console.log("Seeding catalog wines…");
 

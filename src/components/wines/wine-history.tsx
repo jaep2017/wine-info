@@ -125,7 +125,12 @@ function FilterSelect({
   options: string[];
 }) {
   return (
-    <Select value={value} onValueChange={onChange}>
+    <Select
+      value={value}
+      onValueChange={(next) => {
+        if (next) onChange(next);
+      }}
+    >
       <SelectTrigger aria-label={label}>
         <SelectValue placeholder={label} />
       </SelectTrigger>
